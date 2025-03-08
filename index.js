@@ -141,3 +141,34 @@ app.post('/api/upload-csv', upload.single('csvFile'), async (req, res) => {
           return res.status(500).json({ error: 'Failed to process CSV file.' });
       });
 });
+
+
+
+
+// Endpoint to check security headers using securityheaders.com
+app.post('/api/check-security-headers', async (req, res) => {
+    const { url } = req.body;
+
+    if (!url) {
+        return res.status(400).json({ error: 'Please provide a valid URL.' });
+    }
+
+    try {
+        // Fetch the security headers report from securityheaders.com
+        const response = await axios.get(`https://securityheaders.com/?q=${url}&followRedirects=on`);
+
+        // Extract the grade and other details from the response
+        const grade = response.data.match(/<span class="grade-[A-F]">([A-F])<\/span>/)?.[1] || 'N/A';
+        const report = response.data.match(/<div class="report">([\s\S]*?)<\/div>/)?.[1] || 'No report available.';
+
+        // Return the grade and report
+        return res.json({ url, grade, report });
+    } catch (error) {
+        console.error('Error fetching security headers:', error.message);
+        return res.status(500).json({ error: 'Failed to fetch security headers.' });
+    }
+});
+
+
+
+

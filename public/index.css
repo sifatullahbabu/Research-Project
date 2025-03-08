@@ -421,3 +421,115 @@ transform: rotate(90deg);
           background-color:  #1e3c72;
       }
 
+/* CSV Upload Section Styling */
+.csv{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.csv-upload {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.csv-upload:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.csv-upload input[type="file"] {
+  display: none; /* Hide the default file input */
+}
+
+.csv-upload label {
+  display: block;
+  background-color: #1e3c72;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.csv-upload label:hover {
+  background-color: #2a5298;
+  transform: scale(1.05);
+}
+
+.csv-upload .btn {
+  width: 100%;
+  margin-top: 15px;
+  font-size: 1.2rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.csv-upload .btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+}
+
+.csv-upload .btn-secondary:hover {
+  background-color: #5a6268;
+  transform: scale(1.05);
+}
+
+.csv-upload .btn-success {
+  background-color: #28a745;
+  border: none;
+  color: white;
+}
+
+.csv-upload .btn-success:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+/* Animation for the Download Button */
+@keyframes pulse {
+  0% {
+      transform: scale(1);
+  }
+  50% {
+      transform: scale(1.1);
+  }
+  100% {
+      transform: scale(1);
+  }
+}
+
+#downloadCsvButton {
+  animation: pulse 2s infinite;
+}
+
+#downloadCsvButton:hover {
+  animation: none;
+  transform: scale(1.1);
+}
+
+
+
+/* Style for the custom file upload label */
+.custom-file-upload {
+  display: inline-block;
+  background-color: #1e3c72;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.custom-file-upload:hover {
+  background-color: #2a5298;
+  transform: scale(1.05);
+}

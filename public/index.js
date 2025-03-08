@@ -171,16 +171,64 @@ function processCSV() {
 function downloadCSV() {
   const processedData = window.processedCsvData;
   if (processedData) {
+      // Create a Blob with the processed CSV data
       const blob = new Blob([processedData], { type: 'text/csv' });
+
+      // Create a temporary URL for the Blob
       const url = URL.createObjectURL(blob);
+
+      // Create a hidden <a> element to trigger the download
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'processed_results.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.download = 'processed_results.csv'; // Set the file name
+      document.body.appendChild(a); // Append the <a> element to the DOM
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Remove the <a> element from the DOM
+
+      // Revoke the temporary URL to free up memory
       URL.revokeObjectURL(url);
+
+      // Hide the download button after clicking
+      document.getElementById('downloadCsvButton').style.display = 'none';
   } else {
       alert('No processed data available to download.');
   }
 }
+
+
+
+
+
+
+// Function to check security headers using securityheaders.com
+function checkSecurityHeaders() {
+    const url = document.getElementById('securityUrlInput').value;
+
+    if (!url) {
+        alert('Please enter a valid URL.');
+        return;
+    }
+
+    fetch('/api/check-security-headers', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Display the results
+            document.getElementById('securityGrade').textContent = data.grade;
+            document.getElementById('securityReport').textContent = data.report;
+            document.getElementById('securityHeadersResult').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch security headers. Please try again.');
+        });
+}
+
+
+
+
