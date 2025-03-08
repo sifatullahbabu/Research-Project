@@ -4,7 +4,9 @@ const axios = require('axios');
 const path = require('path');
 const app = express();
 const PORT = 3000;
-const savetoDB = require('./controller/portal.controller.js');
+const savetoDB = require('./controller/portal.controller.js');const multer = require('multer'); // For handling file uploads
+const csv = require('csv-parser'); // For parsing CSV files
+const fs = require('fs'); // For file system operations
 
 // Expanded list of security headers to check
 const securityHeaders = [
@@ -35,7 +37,7 @@ try {
 // Middleware to parse JSON request body
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "/public")));
-
+const upload = multer({ dest: 'uploads/' }); // Files will be temporarily stored in the 'uploads/' folder
 // Serve the frontend
 app.get("/api", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
@@ -80,3 +82,62 @@ app.listen(PORT, () => {
 });
 
 
+// Add these imports at the top of your file
+//const multer = require('multer'); // For handling file uploads
+//const csv = require('csv-parser'); // For parsing CSV files
+//const fs = require('fs'); // For file system operations
+
+// Add this after your existing middleware setup
+//const upload = multer({ dest: 'uploads/' });
+
+app.post('/api/upload-csv', upload.single('csvFile'), async (req, res) => {
+  if (!req.file) {
+      return res.status(400).json({ error: 'No CSV file uploaded.' });
+  }
+
+  const results = [];
+
+  // Read and process the uploaded CSV file
+  fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', async () => {
+          const processedData = [];
+
+          // Process each URL in the CSV
+          for (const row of results) {
+              const url = row.url; // Ensure the CSV has a column named 'url'
+              if (url) {
+                  try {
+                      // Perform a HEAD request to fetch headers
+                      const response = await axios.head(url, { validateStatus: () => true });
+
+                      // Prepare the headers report
+                      const headersReport = {};
+                      securityHeaders.forEach(header => {
+                          headersReport[header] = response.headers[header.toLowerCase()] || "missing";
+                      });
+
+                      // Save the result to the database
+                      const ok = savetoDB({ portalName: url, headerStatus: headersReport });
+
+                      // Add the processed data to the result
+                      processedData.push({ url, ...headersReport }); // Include headers in the response
+                  } catch (error) {
+                      console.error(`Error processing URL ${url}:`, error.message);
+                      processedData.push({ url, error: 'Failed to fetch headers' });
+                  }
+              }
+          }
+
+          // Delete the uploaded file after processing
+          fs.unlinkSync(req.file.path);
+
+          // Return the processed data
+          return res.json(processedData);
+      })
+      .on('error', (error) => {
+          console.error('Error processing CSV:', error);
+          return res.status(500).json({ error: 'Failed to process CSV file.' });
+      });
+});

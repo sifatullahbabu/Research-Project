@@ -123,3 +123,64 @@ async function streamResponse() {
   }
 }
 
+// Add these functions to your existing JavaScript
+// Function to process the CSV file
+function processCSV() {
+  const fileInput = document.getElementById('csvFileInput');
+  const file = fileInput.files[0];
+
+  if (file) {
+      const formData = new FormData();
+      formData.append('csvFile', file);
+
+      fetch('/api/upload-csv', {
+          method: 'POST',
+          body: formData,
+      })
+          .then(response => response.json())
+          .then(data => {
+              if (data.length > 0) {
+                  // Convert processed data to CSV format
+                  const headers = Object.keys(data[0]).join(','); // CSV headers
+                  const rows = data.map(row => {
+                      return Object.values(row).join(','); // CSV rows
+                  }).join('\n');
+
+                  // Combine headers and rows
+                  const csvData = `${headers}\n${rows}`;
+
+                  // Store processed data in a global variable
+                  window.processedCsvData = csvData;
+
+                  // Show the download button
+                  document.getElementById('downloadCsvButton').style.display = 'block';
+              } else {
+                  alert('No data processed. Please check the CSV file format.');
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              alert('Failed to process CSV file. Please try again.');
+          });
+  } else {
+      alert('Please select a CSV file to process.');
+  }
+}
+
+// Function to download the processed CSV
+function downloadCSV() {
+  const processedData = window.processedCsvData;
+  if (processedData) {
+      const blob = new Blob([processedData], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'processed_results.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+  } else {
+      alert('No processed data available to download.');
+  }
+}
