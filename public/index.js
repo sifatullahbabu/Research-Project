@@ -109,5 +109,17 @@ document.querySelectorAll('.box-header').forEach(header => {
   });
 });
 
+async function streamResponse() {
+  const responseContainer = document.getElementById("response-container");
+  responseContainer.innerHTML = ""; // Clear previous content
 
+  const response = await puter.ai.chat(
+      "Explain the theory of relativity in detail",
+      { stream: true }
+  );
+
+  for await (const part of response) {
+      responseContainer.innerHTML += part?.text; // Append streamed response
+  }
+}
 
